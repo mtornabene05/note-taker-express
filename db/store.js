@@ -1,15 +1,17 @@
 const util = require("util");
 const fs = require("fs");
-const uuid = require("uuid");
+const {v4:uuidv4} = require("uuid");
 
+//read and write
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 
+//store reads and writes notes and checks for parsed notes
 class Store {
     read() {
         return readFileAsync("db/db.json", "utf8")
     }
-    write(note) {
+    write(notes) {
         return writeFileAsync("db/db.json", JSON.stringify(notes));
     }
 
@@ -25,10 +27,22 @@ class Store {
         })
     }
 
-    //add note or post note
-    //use .write function to add new notes to whats there
-    //rewrite db file
-    //delete note use .filter to filter through to find one that has matching id an rewrite db file without filtered notes
+    addNotes(notes) {
+        const {title, text} = notes;
+
+        const newNotes = {title, text, id:uuidv4()};
+
+        return this.getNotes()
+        .then((notes) => [...notes, newNotes])
+        .then((newDatabaseNotes) => this.write(newDatabaseNotes))
+        .then(() => newNotes)
+    }
+
+    deleteNotes(id) {
+        return this.getNotes()
+        .then((notes) => notes.filter((notes) => notes.id !== id))
+        .then((newDatabaseNotes) => this.write(newDatabaseNotes))
+    }
 }
 
 module.exports = new Store();

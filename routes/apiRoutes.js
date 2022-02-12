@@ -1,5 +1,7 @@
 const router = require("express").Router();
 const store = require("../db/store.js");
+const path = require("path");
+const fs = require ("fs");
 
 //get route for notes
 router.get('/notes', (req, res) => {
@@ -11,17 +13,16 @@ router.get('/notes', (req, res) => {
 });
 
 //post route for the new notes
-
 router.post('/notes', (req, res) => {
-    store.addNote(req.body).then((note) => {
+    store.addNotes(req.body).then((note) => {
         res.json(note);
     })
     .catch((error) => res.status(500).json(error));
 });
 
 //delete route
-router.delete('/notes', (req, res) => {
-    store.deleteNote(req.params.id).then(() => {
+router.delete('/notes/:id', (req, res) => {
+    store.deleteNotes(req.params.id).then(() => {
         res.json({ok:true});
     })
     .catch((error) => res.status(500).json(error));
